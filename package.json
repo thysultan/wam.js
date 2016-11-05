@@ -1,0 +1,32 @@
+{
+	"name": "Wam",
+	"main": "src/application.js",
+	"description": "Wam is a koa inspired middleware for node",
+	"version": "0.0.1",
+	"homepage": "https://github.com/thysultan/wam.js",
+	"license": "MIT",
+	"author": {
+		"name": "Sultan Tarimo",
+		"email": "sultantarimo@me.com"
+	},
+	"keywords": [
+		"wam", 
+		"koa",
+		"fast",
+		"lightweight",
+		"framework", 
+		"middleware",
+		"server"
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/thysultan/wam.js"
+	},
+	"bugs": {
+		"url": "https://github.com/thysultan/wam.js/issues"
+	},
+	"scripts": {
+		"test": "node ./tests/index.js"
+	},
+	"files": ["src"]
+}
