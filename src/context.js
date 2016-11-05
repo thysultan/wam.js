@@ -66,13 +66,24 @@ function Context () {
 
 	// request delegates
 	delegate(context, 'request')
-		.method('get')
-		.method('is')
-		.access('method')
-		.access('url')
-		.getter('origin')
-		.getter('href')
-		.getter('header');
+	  .method('accepts')
+	  .method('get')
+	  .method('is')
+	  .access('querystring')
+	  .access('socket')
+	  .access('search')
+	  .access('method')
+	  .access('query')
+	  .access('path')
+	  .access('url')
+	  .getter('ext')
+	  .getter('origin')
+	  .getter('href')
+	  .getter('protocol')
+	  .getter('host')
+	  .getter('hostname')
+	  .getter('header')
+	  .getter('secure');
 
 	return context;
 }

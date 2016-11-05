@@ -12,9 +12,11 @@
 
 var net       = require('net');
 var url       = require('url');
+var path      = require('path');
 var qs        = require('querystring');
 var utilities = require('./utilities');
 
+var extname   = path.extname;
 var stringify = url.format;
 var parse     = utilities.parse;
 var typeis    = utilities.typeis;
@@ -55,15 +57,16 @@ function Request () {
  		is: is,
  		get: get
  	}, {
- 		header: {get: headerGetter },
  		url: { get: urlGetter, set: urlSetter },
- 		origin: {get: originGetter},
- 		href: {get: hrefGetter},
- 		method: {get: methodGetter, set: methodSetter },
- 		path: {get: pathGetter, set: pathSetter},
- 		query: {get: queryGetter, set: querySetter },
+ 		method: { get: methodGetter, set: methodSetter },
+ 		path: { get: pathGetter, set: pathSetter},
+ 		query: { get: queryGetter, set: querySetter },
  		querystring: {get: querystringGetter, set: querystringSetter },
  		search: { get: searchGetter, set: searchSetter },
+ 		header: {get: headerGetter },
+ 		origin: { get: originGetter},
+ 		href: { get: hrefGetter},
+ 		ext:  { get: extGetter },
  		socket: { get: socketGetter },
  		length: { get: lengthGetter },
  		protocol: { get: protocolGetter },
@@ -85,26 +88,9 @@ function Request () {
 
 /**
  * checks if incoming request contains "Content-Type" and any of the given mime types.
- * 
- * `null` if there is no request body, 
- * `false` if there is no content type, 
- * `else` the first `type` that matches
  *
- * @examples:
- *     // with Content-Type: text/html; charset=utf-8
- *     this.is('html');                       // => 'html'
- *     this.is('text/html');                  // => 'text/html'
- *     this.is('text/*', 'application/json'); // => 'text/html'
- *
- *     // when Content-Type is application/json
- *     this.is('json', 'urlencoded');         // => 'json'
- *     this.is('application/json');           // => 'application/json'
- *     this.is('html', 'application/*');      // => 'application/json'
- *
- *     this.is('html'); // => false
- *
- * @param  {string|string[]}   types...
- * @return {string|false|null}
+ * @param  {string|string[]} types...
+ * @return {string|false}
  */
 function is (types) {
 	var type = this.get('accept').split(',')[0];
@@ -241,6 +227,15 @@ function pathSetter (value) {
 	url.path = null;
 	
 	this.url = stringify(url);
+}
+
+/**
+ * get request path extension
+ *
+ * @return {string}
+ */
+function extGetter () {
+	return extname(parse(this.req).pathname);
 }
 
 /**

@@ -12,8 +12,8 @@
 
 var path       = require('path');
 var url        = require('url');
-var status     = require('./store/status');
-var mime       = require('./store/mime');
+var statuses   = require('./store/statuses');
+var mimes      = require('./store/mimes');
 
 var extname    = path.extname;
 var urlParse   = url.parse;
@@ -41,7 +41,9 @@ function Bootstrap () {
 		respond: respond, 
 		delegate: Delegate, 
 		parse: parse, 
-		typeis: typeis
+		typeis: typeis,
+		statuses: statuses,
+		mimes: mimes
 	};
 }
 
@@ -95,12 +97,10 @@ function compose (middlewares, length) {
  			return false;
  		}
 
- 		return mime[extension] || false;
+ 		return mimes[extension] || false;
  	} else {
  		type = value;
  	}
-
- 	console.log(type, value);
 
  	if (!type) {
      	return false;
@@ -118,7 +118,7 @@ function compose (middlewares, length) {
 function respond (context) {
 	var response = context.response,
 		body     = response.body,
-		code     = response.status,
+		code     = response.statuses,
 		res      = context.res;
 
 	// can't write after response finished
@@ -127,7 +127,7 @@ function respond (context) {
 	}
 
 	// ignore body for empty requests
-	if (status.empty[code]) {
+	if (statuses.empty[code]) {
 		response.body = null;
 
 		return res.end();
@@ -236,8 +236,10 @@ function parse (req) {
   		return parsed;
 	}
 
+	var simplePath = pathRegExp.exec(url);
+
 	// try fast path regexp i.e /page?id=123
-	if (pathRegExp.exec(url)) {
+	if (simplePath) {
 		var pathname = simplePath[1],
 			search   = simplePath[2];
 

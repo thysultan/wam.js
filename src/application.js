@@ -18,6 +18,8 @@ var utilities = require('./utilities');
 
 var compose   = utilities.compose;
 var respond   = utilities.respond;
+var mimes     = utilities.mimes;
+var statuses  = utilities.statuses;
 
 
 /**
@@ -41,7 +43,6 @@ function Bootstrap () {
 			return new Application;
 		}
 
-		this.proxy       = false;
 		this.env         = process.env.NODE_ENV || 'development';
 		this.middlewares = [];
 		this.length      = 0;
@@ -51,11 +52,13 @@ function Bootstrap () {
 	}
 
 	Application.prototype = {
-		use: use, 
-		listen: listen, 
+		statuses: statuses,
+		mimes:    mimes,
+		use:      use, 
+		listen:   listen, 
 		callback: callback, 
-		create: create, 
-		http: http
+		create:   create, 
+		http:     http
 	};
 
 	return Application;

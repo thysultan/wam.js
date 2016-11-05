@@ -10,9 +10,9 @@
  */
 
 
-var status    = require('./store/status');
 var utilities = require('./utilities');
 
+var statuses  = utilities.statuses;
 var getType   = utilities.type;
 var typeis    = utilities.typeis;
 
@@ -192,7 +192,7 @@ function bodySetter (value) {
 
 	// no content
 	if (null == value) {
-		if (!status.empty[code]) {
+		if (!statuses.empty[code]) {
 			this.status = 204;
 		}
 
@@ -272,7 +272,7 @@ function lengthSetter (value) {
  * @return {string}
  */
 function messageGetter () {
-    return this.res.statusMessage || status[this.status];
+    return this.res.statusMessage || statuses[this.status];
 }
 
 /**
@@ -302,9 +302,9 @@ function statusSetter (code) {
 	this._explicit     = true;
 
     this.res.statusCode    = code;
-    this.res.statusMessage = status[code];
+    this.res.statusMessage = statuses[code];
 
-    if (this.body && status.empty[code]) {
+    if (this.body && statuses.empty[code]) {
     	this.body = null;
     }
 }
