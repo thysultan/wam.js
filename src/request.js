@@ -1,96 +1,92 @@
+/**
+ * -----------------------------------------------------------
+ * 
+ * request
+ * 
+ * -----------------------------------------------------------
+ */
+
+
 'use strict';
 
 
-/**
- * ---------------------------------------------------------------------------------
- * 
- * dependencies
- * 
- * ---------------------------------------------------------------------------------
- */
-
-
 var net       = require('net');
-var url       = require('url');
-var path      = require('path');
+var format    = require('url').format;
+var extname   = require('path').extname;
 var qs        = require('querystring');
-var utilities = require('./utilities');
 
-var extname   = path.extname;
-var stringify = url.format;
+var utilities = require('./utilities/index.js');
+
 var parse     = utilities.parse;
-var typeis    = utilities.typeis;
+var isType    = utilities.isType;
 
 
 /**
- * ---------------------------------------------------------------------------------
+ * -----------------------------------------------------------
  * 
  * constructors
  * 
- * ---------------------------------------------------------------------------------
+ * -----------------------------------------------------------
  */
 
 
 /**
- * bootstrap
- *
- * @return {Request}
- */
-function Bootstrap () {
-	return Request;
-}
-
-
-/**
- * response constructor
+ * request constructor
  * 
- * @param {Object} response
+ * @param {Request}
  */
 function Request () {
- 	return Object.defineProperties({ 		
- 		req: null,
- 		res: null,
- 		app: null,
- 		ctx: null,
- 		response: null,
-
- 		is: is,
- 		get: get
- 	}, {
- 		url: { get: urlGetter, set: urlSetter },
- 		method: { get: methodGetter, set: methodSetter },
- 		path: { get: pathGetter, set: pathSetter},
- 		query: { get: queryGetter, set: querySetter },
- 		querystring: {get: querystringGetter, set: querystringSetter },
- 		search: { get: searchGetter, set: searchSetter },
- 		header: {get: headerGetter },
- 		origin: { get: originGetter},
- 		href: { get: hrefGetter},
- 		ext:  { get: extGetter },
- 		socket: { get: socketGetter },
- 		length: { get: lengthGetter },
- 		protocol: { get: protocolGetter },
- 		secure: { get: secureGetter },
- 		type: { get: typeGetter },
- 		host: { get: hostGetter }
-	});
+	this.req      = null;
+	this.res      = null;
+	this.app      = null;
+	this.ctx      = null;
+	this.response = null;
 }
+
+/**
+ * Request prototype
+ * 
+ * @type {Object}
+ */
+Request.prototype = Object.defineProperties({
+	is:           is,
+	get:          get
+}, {
+ 	// getters and setters
+	header:       header(),
+	url:          url(),
+	method:       method(),
+	path:         path(),
+	query:        query(),
+	querystring:  querystring(),
+	search:       search(),
+	origin:       origin(),
+	href:         href(),
+	ext:          ext(),
+	socket:       socket(),
+	length:       length(),
+	protocol:     protocol(),
+	secure:       secure(),
+	type:         type(),
+	host:         host()
+});
 
 
 /**
- * ---------------------------------------------------------------------------------
+ * -----------------------------------------------------------
  * 
  * methods
  * 
- * ---------------------------------------------------------------------------------
+ * -----------------------------------------------------------
  */
 
 
 /**
- * checks if incoming request contains "Content-Type" and any of the given mime types.
+ * checks if incoming request contains "Content-Type" 
+ * and any of the given mime types.
  *
- * @param  {string|string[]} types...
- * @return {string|false}
+ * @param  {(string|string[])} types...
+ * @return {(string|false)}
  */
 function is (types) {
 	var type = this.get('accept').split(',')[0];
@@ -99,16 +95,16 @@ function is (types) {
 		return type || false;
 	}
 
-	return typeis(types, type);
+	return isType(types, type);
 }
 
+
 /**
- * return request header (both `Referrer` and `Referer` are interchangeable)
+ * return request header 
+ * (both `Referrer` and `Referer` are interchangeable)
  *
- * @examples:
- *     this.get('Content-Type'); // => "text/plain"
- *     this.get('content-type'); // => "text/plain"
- *     this.get('Something');    // => undefined
+ * @examples: this.get('Content-Type'); // => "text/plain"
+ *     		  this.get('content-type'); // => "text/plain"
  *
  * @param  {string} name
  * @return {string}
@@ -118,8 +114,11 @@ function get (name) {
 	name = name.toLowerCase();
 
 	// referer/referrer
-	if (name[0].charCodeAt(0) === 114 && name[4].charCodeAt(0) === 114) {
-		return this.req.headers.referrer || this.req.headers.referer || '';
+	if (name[0] === 'r' && name[4] === 'r') {
+		return (
+			this.req.headers.referrer || 
+			this.req.headers.referer || ''
+		);
 	} else {
 		return this.req.headers[name] || '';
 	}
@@ -127,255 +126,370 @@ function get (name) {
 
 
 /**
- * ---------------------------------------------------------------------------------
- * 
- * getters and setters
- * 
- * ---------------------------------------------------------------------------------
+ * header getter
  */
-
-
-/**
- * retrieve request header
- *
- * @return {Object}
- */
-function headerGetter () {
-	return this.req.headers;
-}
-
-/**
- * retrieve request URL
- *
- * @return {string}
- */
-function urlGetter () {
-	return this.req.url;
-}
-
-/**
- * assign request URL
- *
- * @param {string} value
- */
-function urlSetter (value) {
-	this.req.url = value;
-}
-
-/**
- * retrieve origin of URL
- *
- * @return {string}
- */
-function originGetter () {
-	return this.protocol + '' + '://' + this.host;
-}
-
-/**
- * retrieve full request URL
- *
- * @return {string}
- */
-function hrefGetter () {
-	var url = this.req.url;
-
-	// ie, `GET http://example.com/foo`
-	return /^https?:\/\//i.test(url) ? url : this.origin + url;
-}
-
-/**
- * get request method
- *
- * @return {string}
- */
-function methodGetter () {
-	return this.req.method;
-}
-
-/**
- * set request method
- *
- * @param {string} value
- */
-function methodSetter (value) {
-	this.req.method = value;
-}
-
-/**
- * get request pathname
- *
- * @return {string}
- */
-function pathGetter () {
-	return parse(this.req).pathname;
-}
-
-/**
- * assign pathname, retaining the query-string when present
- *
- * @param {string} value
- */
-function pathSetter (value) {
-	var url = parse(this.req);
-
-	// pathname is already identical to value passed
-	if (url.pathname === value) {
-		return;
+function header () {
+	return {
+		/**
+		 * retrieve request header
+		 *
+		 * @return {Object}
+		 */
+		get: function () {
+			return this.req.headers;
+		}
 	}
-
-	url.pathname = value;
-	url.path = null;
-	
-	this.url = stringify(url);
 }
 
-/**
- * get request path extension
- *
- * @return {string}
- */
-function extGetter () {
-	return extname(parse(this.req).pathname);
-}
 
 /**
- * retrieve parsed query-string
- *
- * @return {Object}
+ * url getter and setter
  */
-function queryGetter () {
-	var querystring = this.querystring,
-		querycache  = this._querycache = this._querycache || {};
-
-	return querycache[querystring] || (querycache[querystring] = qs.parse(querystring));
-}
-
-/**
- * assign query-string
- *
- * @param {Object} value
- */
-function querySetter (value) {
-	this.querystring = qs.stringify(value);
-}
-
-/**
- * retrieve query string
- *
- * @return {string}
- */
-function querystringGetter () {
-	return !this.req ? '' : parse(this.req).query || '';
-}
-
-/**
- * assign querystring
- *
- * @param {string} str
- */
-function querystringSetter (value) {
-	var url = parse(this.req);
-
-	// querystring is already identical to value passed
-	if (url.search === ('?' + value)) {
-		return;
+function url () {
+	return {
+		/**
+		 * retrieve request URL
+		 *
+		 * @return {string}
+		 */
+		get: function () {
+			return this.req.url
+		},
+		/**
+		 * assign request URL
+		 *
+		 * @param {string} value
+		 */
+		set: function () {
+			return this.req.url = value;
+		}
 	}
-
-	url.search = value;
-	url.path = null;
-
-	this.url = stringify(url);
 }
 
+
 /**
- * retrieve the search string. Same as the querystring
- * except it includes the leading ?.
- *
- * @return {string}
+ * origin getter
  */
-function searchGetter () {
-	return !this.querystring ? '' : '?' + this.querystring;
+function origin () {
+	return {
+		/**
+		 * retrieve origin of URL
+		 *
+		 * @return {string}
+		 */
+		get: function () {
+			return this.protocol + '' + '://' + this.host;
+		}
+	}
 }
 
+
 /**
- * assign the search string. Same as
- * response.querystring= but included for ubiquity.
- *
- * @param {string} value
+ * href getter
  */
-function searchSetter (value) {
-	this.querystring = value;
+function href () {
+	return {
+		/**
+		 * retrieve full request URL
+		 *
+		 * @return {string}
+		 */
+		get: function () {
+			var url = this.req.url;
+
+			// ie, `GET http://example.com/foo`
+			return /^https?:\/\//i.test(url) ? url : this.origin + url;
+		}
+	}
 }
 
+
 /**
- * retrieve the request socket
- *
- * @return {Connection}
+ * method getter and setter
  */
-function socketGetter () {
-	return this.req.socket;
+function method () {
+	return {
+		/**
+		 * get request method
+		 *
+		 * @return {string}
+		 */
+		get: function () {
+			return this.req.method;
+		},
+		/**
+		 * set request method
+		 *
+		 * @param {string} value
+		 */
+		set: function (value) {
+			this.req.method = value;
+		}
+	}
 }
 
+
 /**
- * retrieve parsed Content-Length when present
- *
- * @return {number}
+ * path getter and setter
  */
-function lengthGetter () {
-	var length = this.get('Content-Length');
+function path () {
+	return {
+		/**
+		 * get request pathname
+		 *
+		 * @return {string}
+		 */
+		get: function () {
+			return parse(this.req).pathname;
+		},
+		/**
+		 * assign pathname, retaining the query-string when present
+		 *
+		 * @param {string} value
+		 */
+		set: function (value) {
+			var url = parse(this.req);
 
-	return !length ? 0 : ~~length;
+			// pathname is already identical to value passed
+			if (url.pathname === value) {
+				return;
+			}
+
+			url.pathname = value;
+			url.path = null;
+			
+			this.url = format(url);
+		}
+	}
 }
 
+
 /**
- * retrieve the protocol string "http" or "https"
- *
- * @return {string}
+ * ext getter
  */
-function protocolGetter () {
-	return this.socket.encrypted ? 'https': 'http';
+function ext () {
+	return {
+		/**
+		 * get request path extension
+		 *
+		 * @return {string}
+		 */
+		get: function () {
+			return extname(parse(this.req).pathname);
+		}
+	}
 }
 
+
 /**
- * short-hand for: this.protocol == 'https'
- *
- * @return {boolean}
+ * query getter and setter
  */
-function secureGetter () {
-	return this.protocol === 'https';
+function query () {
+	return {
+		/**
+		 * retrieve parsed query-string
+		 *
+		 * @return {Object}
+		 */
+		get: function () {
+			var querystring = this.querystring,
+				querycache  = this._querycache = this._querycache || {};
+
+			return (
+				querycache[querystring] || 
+				(querycache[querystring] = qs.parse(querystring))
+			);
+		},
+		/**
+		 * assign query-string
+		 *
+		 * @param {Object} value
+		 */
+		set: function (value) {
+			this.querystring = qs.stringify(value);
+		}
+	}
 }
 
+
 /**
- * retrieve the request mime type void of parameters such as "charset"
- *
- * @return {string}
+ * querystring getter and setter
  */
-function typeGetter () {
-	var type = this.get('Content-Type');
+function querystring () {
+	return {
+		/**
+		 * retrieve query string
+		 *
+		 * @return {string}
+		 */
+		get: function () {
+			return !this.req ? '' : parse(this.req).query || '';
+		},
+		/**
+		 * assign querystring
+		 *
+		 * @param {string} str
+		 */
+		set: function (value) {
+			var url = parse(this.req);
 
-	return !type ? '' : type.split(';')[0];
+			// querystring is already identical to value passed
+			if (url.search === ('?' + value)) {
+				return;
+			}
+
+			url.search = value;
+			url.path = null;
+
+			this.url = format(url);
+		}
+	}
 }
 
+
 /**
- * retrieve host
- *
- * @return {string} hostname:port
+ * search getter and setter
  */
-function hostGetter () {
-	var host = this.get('Host');
-	
-	return !host ? '' : host.split(/\s*,\s*/)[0];
+function search () {
+	return {
+		/**
+		 * retrieve the search string. Same as the querystring
+		 * except it includes the leading ?.
+		 *
+		 * @return {string}
+		 */
+		get: function searchGetter () {
+			return !this.querystring ? '' : '?' + this.querystring;
+		},
+		/**
+		 * assign the search string. Same as
+		 * response.querystring= but included for ubiquity.
+		 *
+		 * @param {string} value
+		 */
+		set: function searchSetter (value) {
+			this.querystring = value;
+		}
+	}
 }
 
 
 /**
- * ---------------------------------------------------------------------------------
+ * socket getter
+ */
+function socket () {
+	return {
+		/**
+		 * retrieve the request socket
+		 *
+		 * @return {Connection}
+		 */
+		get: function () {
+			return this.req.socket;
+		}
+	}
+}
+
+
+/**
+ * length getter
+ */
+function length () {
+	return {
+		/**
+		 * retrieve parsed Content-Length when present
+		 *
+		 * @return {number}
+		 */
+		get: function () {
+			var length = this.get('Content-Length');
+
+			return !length ? 0 : ~~length;
+		}
+	}
+}
+
+
+/**
+ * protocl getter
+ */
+function protocol () {
+	return {
+		/**
+		 * retrieve the protocol string "http" or "https"
+		 *
+		 * @return {string}
+		 */
+		get: function () {
+			return this.socket.encrypted ? 'https': 'http';
+		}
+	}
+}
+
+
+/**
+ * secure getter
+ */
+function secure () {
+	return {
+		/**
+		 * short-hand for: this.protocol == 'https'
+		 *
+		 * @return {boolean}
+		 */
+		get: function () {
+			return this.protocol === 'https';
+		}
+	}
+}
+
+
+/**
+ * type getter
+ */
+function type () {
+	return {
+		/**
+		 * retrieve the request mime type 
+		 * void of parameters such as "charset"
+		 *
+		 * @return {string}
+		 */
+		get: function () {
+			var type = this.get('Content-Type');
+
+			return !type ? '' : type.split(';')[0];
+		}
+	}
+}
+
+
+/**
+ * host getter
+ */
+function host () {
+	return {
+		/**
+		 * retrieve host
+		 *
+		 * @return {string} hostname:port
+		 */
+		get: function () {
+			var host = this.get('Host');
+			
+			return !host ? '' : host.split(/\s*,\s*/)[0];
+		}
+	}
+}
+
+
+/**
+ * -----------------------------------------------------------
  * 
  * exports
  * 
- * ---------------------------------------------------------------------------------
+ * -----------------------------------------------------------
  */
 
 
-module.exports = Bootstrap();
-
+module.exports = Request;

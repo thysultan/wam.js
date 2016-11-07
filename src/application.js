@@ -1,20 +1,29 @@
-'use strict';
-
-
 /**
- * ---------------------------------------------------------------------------------
+ * -----------------------------------------------------------
+ *  _      ______ _____ ___ 
+ * | | /| / / __ `/ __ `__ \
+ * | |/ |/ / /_/ / / / / / /
+ * |__/|__/\__,_/_/ /_/ /_/ 
+ *
+ * Wam.js is a fast koa inspired middleware for node
+ * https://github.com/thysultan/wam.js
  * 
- * dependencies
+ * @licence MIT
  * 
- * ---------------------------------------------------------------------------------
+ * -----------------------------------------------------------
  */
 
 
+'use strict';
+
+
 var http      = require('http');
-var Context   = require('./context');
-var Request   = require('./request');
-var Response  = require('./response');
-var utilities = require('./utilities');
+var fs        = require('fs');
+
+var Context   = require('./context.js');
+var Request   = require('./request.js');
+var Response  = require('./response.js');
+var utilities = require('./utilities/index.js');
 
 var compose   = utilities.compose;
 var respond   = utilities.respond;
@@ -23,54 +32,56 @@ var statuses  = utilities.statuses;
 
 
 /**
- * ---------------------------------------------------------------------------------
+ * -----------------------------------------------------------
  * 
  * constructors
  * 
- * ---------------------------------------------------------------------------------
+ * -----------------------------------------------------------
  */
 
 
 /**
- * bootstrap
+ * application constructor
  *
  * @return {Application}
  */
-function Bootstrap () {
-	function Application () {
-		// support instantiation with or without new keyword
-		if (!(this instanceof Application)) {
-			return new Application;
-		}
-
-		this.env         = process.env.NODE_ENV || 'development';
-		this.middlewares = [];
-		this.length      = 0;
-		this.context     = Context();
-		this.request     = Request();
-		this.response    = Response();
+function Application () {
+	// support instantiation with or without new keyword
+	if (!(this instanceof Application)) {
+		return new Application;
 	}
 
-	Application.prototype = {
-		statuses: statuses,
-		mimes:    mimes,
-		use:      use, 
-		listen:   listen, 
-		callback: callback, 
-		create:   create, 
-		http:     http
-	};
-
-	return Application;
+	this.env         = process.env.NODE_ENV || 'development';
+	this.middlewares = [];
+	this.length      = 0;
+	this.errors      = null;
 }
+
+/**
+ * Application prototype
+ * 
+ * @type {Object}
+ */
+Application.prototype = {
+	use:      use, 
+	listen:   listen, 
+	callback: callback, 
+	create:   create, 
+	onerror:  onerror,
+
+	statuses: statuses,
+	mimes:    mimes,
+	http:     http,
+	fs:       fs
+};
 
 
 /**
- * ---------------------------------------------------------------------------------
+ * -----------------------------------------------------------
  * 
  * methods
  * 
- * ---------------------------------------------------------------------------------
+ * -----------------------------------------------------------
  */
 
 
@@ -84,6 +95,7 @@ function use (middleware) {
 	return this.middlewares[this.length++] = middleware, this;
 }
 
+
 /**
  * shorthand for: http.createServer(app.callback()).listen(...)
  *
@@ -96,24 +108,26 @@ function listen () {
 	return server.listen.apply(server, arguments);
 }
 
+
 /**
  * create callback for http.createServer
  * 
  * @return {function}
  */
 function callback () {
-	var middleware = compose(this.middlewares, this.length),
-		self = this;
+	var middleware  = compose(this.middlewares, this.length),
+		application = this;
 
 	return function (req, res) {
+		// default status
 		res.statusCode = 404;
 
-		var context = self.create(req, res);
+		var context = application.create(req, res);
 
-		middleware(context);
-		respond(context);
+		middleware(context, respond, error => context.onerror(error));
 	};
 }
+
 
 /**
  * create new context
@@ -123,12 +137,13 @@ function callback () {
  * @return {Object}
  */
 function create (req, res) {
-	var context  = Object.create(this.context),
-		request  = context.request  = Object.create(this.request),
-		response = context.response = Object.create(this.response);
-	
-	request.response = response, response.request = request;
+	var context  = new Context,
+		request  = context.request  = new Request,
+		response = context.response = new Response;
 
+	// assign response and request reference to request and response respectively 
+	request.response = response, response.request = request;
+	
 	context.app  = request.app = response.app = this;
 	context.res  = request.res = response.res = res;
 	context.req  = request.req = response.req = req;
@@ -138,13 +153,22 @@ function create (req, res) {
 
 
 /**
- * ---------------------------------------------------------------------------------
+ * Default error handler.
+ *
+ * @param {Error} error
+ */
+function onerror (error) {
+	console.error('\n', (error.stack || error.toString()).replace(/^/gm, '  '), '\n');
+}
+
+
+/**
+ * -----------------------------------------------------------
  * 
  * exports
  * 
- * ---------------------------------------------------------------------------------
+ * -----------------------------------------------------------
  */
 
 
-module.exports = Bootstrap();
-
+module.exports = Application;
