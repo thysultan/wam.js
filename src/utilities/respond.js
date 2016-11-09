@@ -9,6 +9,8 @@
 
 'use strict';
 
+var zlib     = require('zlib');
+var Stream   = require('stream');
 
 var statuses = require('./statuses');
 
@@ -21,7 +23,7 @@ var statuses = require('./statuses');
 function respond (context) {
 	var response = context.response,
 		body     = response.body,
-		code     = response.statuses,
+		code     = response.status,
 		res      = context.res;
 
 	// can't write after response finished
@@ -55,6 +57,7 @@ function respond (context) {
 			response.length = Buffer.byteLength(body);
 		}
 
+		// i.e Not Found
 		return res.end(body);
 	}
 

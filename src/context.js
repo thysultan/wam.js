@@ -35,9 +35,7 @@ function Context () {
 	this.req      = null;
 	this.request  = null;
 	this.response = null;
-	this.set      = null;
-	this.get      = null;
-	this.is       = null;
+	this.params   = null;
 	this.state    = {};
 }
 
@@ -48,36 +46,25 @@ function Context () {
  * @type {Object}
  */
 Context.prototype = {
-	onerror: function onerror (error) {
+	error: function error (error) {
 		if (!(error instanceof Error)) {
 			error = new Error(error);
 		}
 
+		// logger
+		this.app.error(error);
+
 		// if response is yet to complete
 		if (!this.headerSent || this.writable) {
-	  		// force text/plain
+	  		// force text/html
 	  		this.type = 'html';
 
-	  		// ENOENT(no such file or directory) support
-	  		if (error.code === 'ENOENT') {
-	  			error.status = 404;
-	  		}
-
 	  		// default to 500
-	  		if (typeof error.status !== 'number' || !statuses[error.status]) {
-	  			error.status = 500;
-	  		}
+			var code    = 500,
+				message = code + ' - ' + (statuses[code] || 'Something went wrong');
 
-	  		// construct response
-	  		var code = error.status;
-
-			var message = (
-				(this.app.errors && this.app.errors[code]) ||
-				(error.expose && error.message)  || 
-				('<h1>' + code + ' - ' + (this[code] || 'Something went wrong') + '</h1>')
-			);
-
-	  		this.status = error.status;
+			message     = '<h1>' + message + '</h1>';
+	  		this.status = code;
 	  		this.length = Buffer.byteLength(message);
 
 	  		this.res.end(message);
@@ -96,30 +83,32 @@ delegate(Context.prototype, 'response')
 	.access('length')
 	.access('type')
 	.access('lastModified')
+	.access('etag')
 	.getter('headerSent')
 	.getter('writable');
 
 
 // request delegates
 delegate(Context.prototype, 'request')
-  .method('accepts')
-  .method('get')
-  .method('is')
-  .access('querystring')
-  .access('socket')
-  .access('search')
-  .access('method')
-  .access('query')
-  .access('path')
-  .access('url')
-  .getter('ext')
-  .getter('origin')
-  .getter('href')
-  .getter('protocol')
-  .getter('host')
-  .getter('hostname')
-  .getter('header')
-  .getter('secure');
+	.method('accepts')
+	.method('get')
+	.method('is')
+	.access('querystring')
+	.access('socket')
+	.access('search')
+	.access('method')
+	.access('query')
+	.access('path')
+	.access('url')
+	.getter('origin')
+	.getter('href')
+	.getter('protocol')
+	.getter('host')
+	.getter('hostname')
+	.getter('header')
+	.getter('secure')
+	.getter('ext')
+	.getter('ips');
 
 
 /**

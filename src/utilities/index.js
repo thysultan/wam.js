@@ -18,7 +18,9 @@ var parse    = require('./parse.js');
 var isType   = require('./isType.js');
 var isJSON   = require('./isJSON.js');
 var statuses = require('./statuses.js');
-var mimes    = require('./mimes.js')
+var mimes    = require('./mimes.js');
+var Static   = require('./static.js');
+var Compress = require('./compress.js');
 
 
 /**
@@ -37,7 +39,9 @@ module.exports = {
 	delegate: delegate, 
 	parse:    parse, 
 	isType:   isType,
+	isJSON:   isJSON,
 	statuses: statuses,
 	mimes:    mimes,
-	isJSON:   isJSON
+	static:   Static,
+	compress: Compress
 };

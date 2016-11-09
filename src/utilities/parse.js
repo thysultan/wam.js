@@ -34,7 +34,7 @@ function parser (req) {
   		return parsed;
 	}
 
-	var simple = pathRegExp.exec(url);
+	var simple = regex.exec(url);
 
 	// try fast path regexp i.e /page?id=123
 	if (simple) {

@@ -64,7 +64,8 @@ Response.prototype = Object.defineProperties({
 	lastModified: lastModified(),
 	socket:       socket(),
 	writable:     writable(),
-	headerSent:   headerSent()
+	headerSent:   headerSent(),
+	etag:         etag()
 });
 
 
@@ -142,6 +143,15 @@ function remove (name) {
 
 
 /**
+ * -----------------------------------------------------------
+ * 
+ * getters and setters
+ * 
+ * -----------------------------------------------------------
+ */
+
+
+/**
  * type getter and setter
  */
 function type () {
@@ -197,7 +207,7 @@ function body () {
 			this._body = value;
 
 			// no content
-			if (null == value) {
+			if (value == null) {
 				if (!statuses.empty[code]) {
 					this.status = 204;
 				}
@@ -214,7 +224,7 @@ function body () {
 				this.status = 200;
 			}
 
-			// set the content-type only if not yet set
+			// set the content-type if not yet set
 		    var setType = !this.header['content-type'];
 
 		    // string
@@ -241,7 +251,7 @@ function body () {
 				return this._body;
 		    }
 
-		    // json
+		    // json (default)
 		    this.remove('Content-Length');
 		    this.type = 'json';
 
@@ -460,6 +470,36 @@ function headerSent () {
 		 */
 		get: function get () {
 			return this.res.headersSent;
+		}
+	}
+}
+
+
+function etag () {
+	var regex = /^(W\/)?"/;
+
+	return {
+		/**
+		 * get the ETag of a response
+		 *
+		 * @return {string}
+		 */
+		get: function () {
+			return this.get('ETag');
+		},
+		/**
+		 * set the ETag of a response, normalized quotes if necessary
+		 *
+		 *     'md5hashsum' === '"md5hashsum"';
+		 *
+		 * @param {string} value
+		 */
+		set: function (value) {
+	  		if (!regex.test(value)) {
+	  			value = '"' + value + '"';
+	  		}
+
+	  		this.set('ETag', value);
 		}
 	}
 }

@@ -49,26 +49,27 @@ function Request () {
  * @type {Object}
  */
 Request.prototype = Object.defineProperties({
-	is:           is,
-	get:          get
+	is:               is,
+	get:              get
 }, {
  	// getters and setters
-	header:       header(),
-	url:          url(),
-	method:       method(),
-	path:         path(),
-	query:        query(),
-	querystring:  querystring(),
-	search:       search(),
-	origin:       origin(),
-	href:         href(),
-	ext:          ext(),
-	socket:       socket(),
-	length:       length(),
-	protocol:     protocol(),
-	secure:       secure(),
-	type:         type(),
-	host:         host()
+	header:           header(),
+	url:              url(),
+	method:           method(),
+	path:             path(),
+	query:            query(),
+	querystring:      querystring(),
+	search:           search(),
+	origin:           origin(),
+	href:             href(),
+	ext:              ext(),
+	socket:           socket(),
+	length:           length(),
+	protocol:         protocol(),
+	secure:           secure(),
+	type:             type(),
+	host:             host(),
+	ips:              ips()
 });
 
 
@@ -117,12 +118,21 @@ function get (name) {
 	if (name[0] === 'r' && name[4] === 'r') {
 		return (
 			this.req.headers.referrer || 
-			this.req.headers.referer || ''
+			this.req.headers.referer  || ''
 		);
 	} else {
 		return this.req.headers[name] || '';
 	}
 }
+
+
+/**
+ * -----------------------------------------------------------
+ * 
+ * getters and setters
+ * 
+ * -----------------------------------------------------------
+ */
 
 
 /**
@@ -275,7 +285,7 @@ function ext () {
 		 * @return {string}
 		 */
 		get: function () {
-			return extname(parse(this.req).pathname);
+			return extname(parse(this.req).pathname).substr(1);
 		}
 	}
 }
@@ -478,6 +488,25 @@ function host () {
 			var host = this.get('Host');
 			
 			return !host ? '' : host.split(/\s*,\s*/)[0];
+		}
+	}
+}
+
+
+/**
+ * ips getter
+ */
+function ips () {
+	return  {
+		/**
+		 * parse "X-Forwarded-For" ip address list
+		 *
+		 * @return {any[]}
+		 */
+		get: function () {
+	  		var value = this.get('X-Forwarded-For');
+
+	  		return value ? value.split(/\s*,\s*/) : [];
 		}
 	}
 }

@@ -21,39 +21,23 @@ function compose (middlewares, length) {
 	return function (context, callback, reject) {
 		var resolved = 0;
 
-		// resolve middlware
-		function resolve () {
-			resolved++;
+		function resolve (end) {
+			resolved = end ? length : resolved + 1;
+				
+			resolved === length ? callback(context) : dispatch();
+		}
 
-			if (resolved === length) {
-				callback(context);
+		function dispatch () {
+			try {
+				return middlewares[resolved].call(context, context, resolve);
+			} catch (error) {
+				return reject(error);
 			}
 		}
 
-		// rush through all middlewares sync
-		for (var i = 0; i < length; i++) {
-			call(context, resolve, reject, middlewares[i]);
-		}
+		dispatch();
 	}
 }
-
-
-/**
- * call middlware
- * 
- * @param  {function} middlware
- * @param  {function} resolve
- * @param  {function} reject
- * @param  {Object}   context
- */
-function call (context, resolve, reject, middlware) {
-	try {
-		middleware.call(context, context, resolve);
-	} catch (error) {
-		reject(error);
-	}
-}
-
 
 
 /**

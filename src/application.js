@@ -29,6 +29,8 @@ var compose   = utilities.compose;
 var respond   = utilities.respond;
 var mimes     = utilities.mimes;
 var statuses  = utilities.statuses;
+var Static    = utilities.static;
+var Compress  = utilities.compress;
 
 
 /**
@@ -67,7 +69,9 @@ Application.prototype = {
 	listen:   listen, 
 	callback: callback, 
 	create:   create, 
-	onerror:  onerror,
+	error:    error,
+	static:   Static,
+	compress: Compress,
 
 	statuses: statuses,
 	mimes:    mimes,
@@ -88,11 +92,67 @@ Application.prototype = {
 /**
  * define middleware
  *
- * @param  {function}    middleware
- * @return {Application} self
+ * @param  {(string|function)}  middleware
+ * @param  {(string|function)=} type
+ * @param  {function=}          callback
+ * @return {Application}        self
  */
-function use (middleware) {
-	return this.middlewares[this.length++] = middleware, this;
+function use (route, type, callback) {
+	this.middlewares[this.length++] = !type ? route : router(route, type, callback);
+	return this;
+}
+
+
+/**
+ * define router middleware
+ * 
+ * @param  {string} route
+ * @param  {(string|function)=} type
+ * @param  {function}           middleware
+ * @return {function}
+ */
+function router (route, type, middleware) {	
+	type = type.toUpperCase();
+
+	if (!middleware) {
+		middleware = type, type = 'ALL';
+	}
+
+	var index   = 0,
+		params  = [],
+		regexp  = route instanceof RegExp ? route : /([:*])(\w+)|([\*])/g,
+		pattern = new RegExp(
+			route.replace(regexp, function () {
+				var id = arguments[2];
+				return id != null ? (params[index++] = id, '([^\/]+)') : '(?:.*)';
+			}) + '$'
+		);
+
+	var reducer = (previousValue, currentValue, index) => {
+		if (previousValue == null) {
+			previousValue = {};
+		}
+
+		previousValue[params[index]] = currentValue;
+
+		return previousValue;
+	};
+
+	return function (ctx, next) {		
+		var location = ctx.request.url,
+			method   = ctx.request.method,
+			match    = location.match(pattern);
+
+		if (match != null && (method === type || type === 'ALL')) {			
+			var data = match.slice(1, match.length);
+
+			ctx.params = data.reduce(reducer, null);
+
+			middleware(ctx, next);
+		} else {
+			next();
+		}
+	}
 }
 
 
@@ -124,7 +184,7 @@ function callback () {
 
 		var context = application.create(req, res);
 
-		middleware(context, respond, error => context.onerror(error));
+		middleware(context, respond, error => context.error(error));
 	};
 }
 
@@ -153,11 +213,11 @@ function create (req, res) {
 
 
 /**
- * Default error handler.
+ * default error handler
  *
  * @param {Error} error
  */
-function onerror (error) {
+function error (error) {
 	console.error('\n', (error.stack || error.toString()).replace(/^/gm, '  '), '\n');
 }
 

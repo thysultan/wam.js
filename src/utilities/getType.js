@@ -17,7 +17,7 @@ var mimes   = require('./mimes');
 /**
  * Create a full Content-Type header given a MIME type or extension
  *
- * @param {string} value
+ * @param  {string} value
  * @return {boolean|string}
  */
 function getType (value) {
