@@ -12,6 +12,7 @@
 
 var fs       = require('fs');
 var path     = require('path');
+var mimes    = require('./mimes');
 
 var regexp   = /(^|\/)\.[^\/\.]/g;
 
@@ -57,7 +58,7 @@ function Static (base, callback) {
 				context.response.body = callback();
 				next(true);
 			} else {
-				next();
+				mimes[context.request.ext] ? next(true) : next();
 			}
 		}
 	}

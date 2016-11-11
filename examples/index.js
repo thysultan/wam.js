@@ -4,7 +4,7 @@ const Dio = require('../../dio.js/dio.js');
 const app = new Wam();
 
 const {Component, renderToString, DOM} = Dio;
-const {button, text, h1} = DOM(['button', 'h1']);
+const {button, text, h1} = DOM(['button', 'h1', 'text']);
 
 class Button extends Component {
 	stylesheet () {
@@ -40,43 +40,43 @@ app.use('/:user', 'get', function (ctx, next) {
 	next();
 });
 
-// app.use((ctx, next) => {
-// 	ctx.body = renderToString([Heading, Button], `
-// 		<html>
-// 			<head>
-// 				<title>Example</title>
-// 				{{style}}
-// 			</head>
-// 			<body hydrate>
-// 				{{body}}
+app.use((ctx, next) => {
+	ctx.body = renderToString([Heading, Button], `
+		<html>
+			<head>
+				<title>Example</title>
+				{{style}}
+			</head>
+			<body hydrate>
+				{{body}}
 
-// 				<script>
-// 					var prom = Promise.resolve();
-// 					var start = performance.now();
-// 					for (var i = 0; i < 1000; i++) {
-// 						var next = prom instanceof Promise;
-// 						if (next === undefined) {
-// 							throw 'error';
-// 						}
-// 					}
-// 					console.log(performance.now()-start, 'instance');
+				<script>
+					var prom = Promise.resolve();
+					var start = performance.now();
+					for (var i = 0; i < 1000; i++) {
+						var next = prom instanceof Promise;
+						if (next === undefined) {
+							throw 'error';
+						}
+					}
+					console.log(performance.now()-start, 'instance');
 
-// 					var prom = Promise.resolve();
-// 					var start = performance.now();
-// 					for (var i = 0; i < 1000; i++) {
-// 						var next = prom && typeof prom.then === 'function' && true;
-// 						if (next === undefined) {
-// 							throw 'error';
-// 						}
-// 					}
-// 					console.log(performance.now()-start, 'property');
-// 				</script>
-// 			</body>
-// 		</html>		
-// 	`);
+					var prom = Promise.resolve();
+					var start = performance.now();
+					for (var i = 0; i < 1000; i++) {
+						var next = prom && typeof prom.then === 'function' && true;
+						if (next === undefined) {
+							throw 'error';
+						}
+					}
+					console.log(performance.now()-start, 'property');
+				</script>
+			</body>
+		</html>		
+	`);
 
-// 	next();
-// });
+	next();
+});
 
 // start server
 app.listen(3000);

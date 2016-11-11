@@ -26,7 +26,8 @@
 		"url": "https://github.com/thysultan/wam.js/issues"
 	},
 	"scripts": {
-		"test": "node ./tests"
+		"test": "node ./tests",
+		"start": "node ./examples"
 	},
 	"files": ["src"]
 }
