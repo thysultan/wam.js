@@ -1,8 +1,8 @@
 {
-	"name": "Wam",
+	"name": "wamjs",
 	"main": "src/application.js",
 	"description": "Wam is a koa inspired middleware for node",
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"homepage": "https://github.com/thysultan/wam.js",
 	"license": "MIT",
 	"author": {
@@ -26,7 +26,7 @@
 		"url": "https://github.com/thysultan/wam.js/issues"
 	},
 	"scripts": {
-		"test": "node ./tests/index.js"
+		"test": "node ./tests"
 	},
 	"files": ["src"]
 }
