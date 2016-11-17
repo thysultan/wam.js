@@ -9,7 +9,6 @@
 
 'use strict';
 
-var zlib     = require('zlib');
 var Stream   = require('stream');
 
 var statuses = require('./statuses');
