@@ -107,12 +107,12 @@ function is (types) {
  * @examples: this.get('Content-Type'); // => "text/plain"
  *     		  this.get('content-type'); // => "text/plain"
  *
- * @param  {string} name
+ * @param  {string} field
  * @return {string}
  */
-function get (name) {
+function get (field) {
 	// normalize case
-	name = name.toLowerCase();
+	var name = field.toLowerCase();
 
 	// referer/referrer
 	if (name[0] === 'r' && name[4] === 'r') {
@@ -522,3 +522,4 @@ function ips () {
 
 
 module.exports = Request;
+

@@ -27,13 +27,13 @@ var compressible = type => regexp.test(type);
 function Compress (options) {
 	options = options || {};
 
-	var filter    = options.filter    || compressible,
-		threshold = options.threshold || 1024;
+	var filter    = options.filter    || compressible;
+	var threshold = options.threshold || 1024;
 
 	return function (context, next) {
-		var request  = context.request,
-			response = context.response, 
-			body     = response.body;
+		var request  = context.request;
+		var response = context.response; 
+		var body     = response.body;
 
 		if (
 			!body || 
@@ -57,7 +57,7 @@ function Compress (options) {
 		response.set('Content-Encoding', 'gzip');
       	response.res.removeHeader('Content-Length');
 
-      	zlib.gzip(body, (error, result) => {      		
+      	zlib.gzip(body, function (error, result) {      		
   	   		error ? context.error(error) : context.response.body = result;
   	   		next();
       	});
@@ -75,3 +75,4 @@ function Compress (options) {
 
 
 module.exports = Compress;
+

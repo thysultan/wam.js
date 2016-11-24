@@ -25,18 +25,18 @@ var regexp   = /(^|\/)\.[^\/\.]/g;
  * @return {function}
  */
 function Static (base, callback) {
-	var directory = path.normalize(base),
-		start     = directory.length,
-		stats     = fs.statSync(directory),
-		modified  = stats.mtime,
-		list      = List(directory, {}, start),
-		handle    = typeof callback === 'function';
+	var directory = path.normalize(base);
+	var start     = directory.length;
+	var stats     = fs.statSync(directory);
+	var modified  = stats.mtime;
+	var list      = List(directory, {}, start);
+	var handle    = typeof callback === 'function';
 
 	// return middleware
 	return function (context, next) {
-		var pathname,
-			uri      = context.req.url,
-			mtime    = fs.statSync(directory).mtime;
+		var pathname;
+		var uri      = context.req.url;
+		var mtime    = fs.statSync(directory).mtime;
 
 		// if directory modified build new list
 		if (mtime > modified) {
@@ -103,3 +103,4 @@ function List (directory, store, start) {
 
 
 module.exports = Static;
+

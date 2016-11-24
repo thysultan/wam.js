@@ -60,8 +60,8 @@ Context.prototype = {
 	  		this.type = 'html';
 
 	  		// default to 500
-			var code    = 500,
-				message = code + ' - ' + (statuses[code] || 'Something went wrong');
+			var code    = 500;
+			var message = code + ' - ' + (statuses[code] || 'Something went wrong');
 
 			message     = '<h1>' + message + '</h1>';
 	  		this.status = code;
@@ -121,3 +121,5 @@ delegate(Context.prototype, 'request')
 
  
 module.exports = Context;
+
+

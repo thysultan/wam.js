@@ -45,3 +45,4 @@ module.exports = {
 	static:   Static,
 	compress: Compress
 };
+

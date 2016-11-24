@@ -58,3 +58,4 @@ function getType (value) {
 
 
 module.exports = getType;
+

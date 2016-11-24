@@ -21,9 +21,9 @@ function isType (types, value) {
 	}
 
 	// text/html ---> html
-	var type   = value,
-		name   = type.split('/')[1],
-		length = arguments.length;
+	var type   = value;
+	var name   = type.split('/')[1];
+	var length = arguments.length;
 
 	if (typeof types === 'string') {
 		// single argument, also support generic types 
@@ -66,3 +66,4 @@ function isType (types, value) {
 
 
 module.exports = isType;
+

@@ -20,10 +20,10 @@ var statuses = require('./statuses');
  * @param {Object} context
  */
 function respond (context) {
-	var response = context.response,
-		body     = response.body,
-		code     = response.status,
-		res      = context.res;
+	var response = context.response;
+	var body     = response.body;
+	var code     = response.status;
+	var res      = context.res;
 
 	// can't write after response finished
 	if (!response.writable) {
@@ -91,3 +91,4 @@ function respond (context) {
 
 
 module.exports = respond;
+

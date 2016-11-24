@@ -96,3 +96,4 @@ module.exports = {
     // gzip
     'gzip':   'multipart/x-gzip'
 };
+

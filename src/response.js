@@ -87,12 +87,7 @@ Response.prototype = Object.defineProperties({
  */
 function is (types) {
 	var type = this.type;
-
-	if (!types) {
-		return type || false;
-	}
-
-	return isType(types, type);
+	return !types ? (type || false) : isType(types, type);
 }
 
 
@@ -204,6 +199,8 @@ function body () {
 		 * @param {string} value
 		 */
 		set: function set (value) {
+			var original = this._body;
+			
 			this._body = value;
 
 			// no content
@@ -251,7 +248,20 @@ function body () {
 				return this._body;
 		    }
 
-		    // json (default)
+		    // stream
+		    if (typeof value.pipe === 'function') {
+	      		if (original != null && original != value) {
+	      			this.remove('Content-Length');
+	      		}
+
+	      		if (setType) {
+	      			this.type = 'bin';
+	      		}
+
+	      		return this._body;
+		    }
+
+		    // json
 		    this.remove('Content-Length');
 		    this.type = 'json';
 
@@ -515,3 +525,4 @@ function etag () {
 
 
 module.exports = Response;
+

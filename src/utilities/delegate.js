@@ -79,3 +79,4 @@ Delegate.prototype = {
 
 
 module.exports = Delegate;
+

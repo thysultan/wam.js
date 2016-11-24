@@ -118,17 +118,17 @@ function router (route, type, middleware) {
 		middleware = type, type = 'ALL';
 	}
 
-	var index   = 0,
-		params  = [],
-		regexp  = route instanceof RegExp ? route : /([:*])(\w+)|([\*])/g,
-		pattern = new RegExp(
-			route.replace(regexp, function () {
-				var id = arguments[2];
-				return id != null ? (params[index++] = id, '([^\/]+)') : '(?:.*)';
-			}) + '$'
-		);
+	var index   = 0;
+	var params  = [];
+	var regexp  = route instanceof RegExp ? route : /([:*])(\w+)|([\*])/g;
+	var pattern = new RegExp(
+		route.replace(regexp, function () {
+			var id = arguments[2];
+			return id != null ? (params[index++] = id, '([^\/]+)') : '(?:.*)';
+		}) + '$'
+	);
 
-	var reducer = (previousValue, currentValue, index) => {
+	function reducer (previousValue, currentValue, index) {
 		if (previousValue == null) {
 			previousValue = {};
 		}
@@ -139,9 +139,9 @@ function router (route, type, middleware) {
 	};
 
 	return function (ctx, next) {		
-		var location = ctx.request.url,
-			method   = ctx.request.method,
-			match    = location.match(pattern);
+		var location = ctx.request.url;
+		var method   = ctx.request.method;
+		var match    = location.match(pattern);
 
 		if (match != null && (method === type || type === 'ALL')) {			
 			var data = match.slice(1, match.length);
@@ -197,9 +197,9 @@ function callback () {
  * @return {Object}
  */
 function create (req, res) {
-	var context  = new Context,
-		request  = context.request  = new Request,
-		response = context.response = new Response;
+	var context  = new Context;
+	var request  = context.request  = new Request;
+	var response = context.response = new Response;
 
 	// assign response and request reference to request and response respectively 
 	request.response = response, response.request = request;
@@ -232,3 +232,5 @@ function error (error) {
 
 
 module.exports = Application;
+
+

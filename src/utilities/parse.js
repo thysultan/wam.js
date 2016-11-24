@@ -38,8 +38,8 @@ function parser (req) {
 
 	// try fast path regexp i.e /page?id=123
 	if (simple) {
-		var pathname = simple[1],
-			search   = simple[2];
+		var pathname = simple[1];
+		var search   = simple[2];
 
 		parsed = {
 			path: url,
@@ -70,3 +70,4 @@ function parser (req) {
 
 
 module.exports = parser;
+
