@@ -27,7 +27,7 @@ function getType (value) {
 
  	var type;
 
- 	if (value.indexOf('/')) {
+ 	if (value.indexOf('/') === -1) {
  		// get the extension ("ext" or ".ext" or full path)
  		var extension = extname('x.' + value).toLowerCase().substr(1);
 

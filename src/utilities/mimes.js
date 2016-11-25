@@ -94,6 +94,15 @@ module.exports = {
     'eot':    'application/vnd.ms-fontobject',
 
     // gzip
-    'gzip':   'multipart/x-gzip'
+    'gzip':   'multipart/x-gzip',
+
+    compressible: {
+        'html': true,
+        'js':   true,
+        'css':  true,
+        'md':   true,
+        'log':  true,
+        'txt':  true,
+    }
 };
 

@@ -1,7 +1,7 @@
 /**
  * -----------------------------------------------------------
  * 
- * compress, middleware for static file generator
+ * compress, middleware compressing responses
  * 
  * -----------------------------------------------------------
  */
@@ -11,12 +11,20 @@
 
 
 var zlib         = require('zlib');
-
-var empty        = require('./statuses.js').empty;
-var isJSON       = require('./isJSON.js');
+var empty        = require('../utilities/statuses').empty;
+var isJSON       = require('../utilities/isJSON');
 
 var regexp       = /^text\/|\+json$|\+text$|\+xml$/i;
 var compressible = type => regexp.test(type);
+
+
+/**
+ * -----------------------------------------------------------
+ * 
+ * constructors
+ * 
+ * -----------------------------------------------------------
+ */
 
 
 /**
@@ -49,18 +57,18 @@ function Compress (options) {
 			body = this.body = JSON.stringify(body);
 		}
 
-		// don't gzip if less than threshold
-		if (response.length < threshold) {
+		// only gzip if greater than threshold
+		if (response.length > threshold) {
+			response.set('Content-Encoding', 'gzip');
+	      	response.remove('Content-Length');
+
+	      	zlib.gzip(body, function (error, result) {
+	  	   		!error ? response.body = result : context.error(error);
+	  	   		next();
+	      	});	
+		} else {
 			return next();
 		}
-
-		response.set('Content-Encoding', 'gzip');
-      	response.res.removeHeader('Content-Length');
-
-      	zlib.gzip(body, function (error, result) {      		
-  	   		error ? context.error(error) : context.response.body = result;
-  	   		next();
-      	});
 	}
 }
 

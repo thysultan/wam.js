@@ -14,8 +14,7 @@ var net       = require('net');
 var format    = require('url').format;
 var extname   = require('path').extname;
 var qs        = require('querystring');
-
-var utilities = require('./utilities/index.js');
+var utilities = require('./utilities/');
 
 var parse     = utilities.parse;
 var isType    = utilities.isType;
@@ -48,10 +47,11 @@ function Request () {
  * 
  * @type {Object}
  */
-Request.prototype = Object.defineProperties({
-	is:               is,
-	get:              get
-}, {
+Request.prototype = Object.create(null, {
+	// methods
+	is:               is(),
+	get:              get(),
+
  	// getters and setters
 	header:           header(),
 	url:              url(),
@@ -89,14 +89,18 @@ Request.prototype = Object.defineProperties({
  * @param  {(string|string[])} types...
  * @return {(string|false)}
  */
-function is (types) {
-	var type = this.get('accept').split(',')[0];
+function is () {
+	return {
+		value: function is (types) {
+			var type = this.get('accept').split(',')[0];
 
-	if (!types) {
-		return type || false;
+			if (!types) {
+				return type || false;
+			}
+
+			return isType(types, type);
+		}
 	}
-
-	return isType(types, type);
 }
 
 
@@ -110,18 +114,22 @@ function is (types) {
  * @param  {string} field
  * @return {string}
  */
-function get (field) {
-	// normalize case
-	var name = field.toLowerCase();
+function get () {
+	return {
+		value: function get (field) {
+			// normalize case
+			var name = field.toLowerCase();
 
-	// referer/referrer
-	if (name[0] === 'r' && name[4] === 'r') {
-		return (
-			this.req.headers.referrer || 
-			this.req.headers.referer  || ''
-		);
-	} else {
-		return this.req.headers[name] || '';
+			// referer/referrer
+			if (name[0] === 'r' && name[4] === 'r') {
+				return (
+					this.req.headers.referrer || 
+					this.req.headers.referer  || ''
+				);
+			} else {
+				return this.req.headers[name] || '';
+			}
+		}
 	}
 }
 

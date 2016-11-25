@@ -1,6 +1,6 @@
 {
 	"name": "wamjs",
-	"main": "src/application.js",
+	"main": "wam.js",
 	"description": "Wam is a koa inspired middleware for node",
 	"version": "0.1.2",
 	"homepage": "https://github.com/thysultan/wam.js",

@@ -16,6 +16,7 @@ var statuses  = utilities.statuses;
 var getType   = utilities.getType;
 var isType    = utilities.isType;
 var isJSON    = utilities.isJSON;
+var pretty    = utilities.pretty;
 
 
 /**
@@ -48,12 +49,13 @@ function Response () {
  * 
  * @type {Object}
  */
-Response.prototype = Object.defineProperties({
-	is:           is,
-	get:          get,
-	set:          set,
-	remove:       remove
-}, {
+Response.prototype = Object.create(null, {
+	// methods
+	is:           is(),
+	get:          get(),
+	set:          set(),
+	remove:       remove(),
+
 	// getters and setters
 	type:         type(),
 	body:         body(),
@@ -85,9 +87,13 @@ Response.prototype = Object.defineProperties({
  * @param  {string|string[]} types...
  * @return {boolean|string}
  */
-function is (types) {
-	var type = this.type;
-	return !types ? (type || false) : isType(types, type);
+function is () {
+	return {
+		value: function is (types) {
+			var type = this.type;
+			return !types ? (type || false) : isType(types, type);
+		}
+	}
 }
 
 
@@ -97,8 +103,12 @@ function is (types) {
  * @param  {string} name
  * @return {string}
  */
-function get (name) {
- 	return this.header[name.toLowerCase()] || '';
+function get () {
+	return {
+		value: function get (name) {
+		 	return this.header[name.toLowerCase()] || '';
+		}
+	}
 }
 
 
@@ -108,20 +118,24 @@ function get (name) {
  * @param {string|Object|any[]} name
  * @param {string}              value
  */
-function set (name, value){
-	if (arguments.length === 2) {
-		value = (value.map && value.map(String)) || String(value);
+function set () {
+	return {
+		value: function set (name, value){
+			if (arguments.length === 2) {
+				value = (value.map && value.map(String)) || String(value);
 
-		// normalize name case, assign to cache
-		this._headers[name.toLowerCase()] = value;
+				// normalize name case, assign to cache
+				this._headers[name.toLowerCase()] = value;
 
-		this.res.setHeader(name, value);
-	} else {
-		var keys = Object.keys(name);
+				this.res.setHeader(name, value);
+			} else {
+				var keys = Object.keys(name);
 
-		for (var i = 0, length = keys.length; i < length; i++) {
-			var key = keys[i];
-			this.set(key, name[key]);
+				for (var i = 0, length = keys.length; i < length; i++) {
+					var key = keys[i];
+					this.set(key, name[key]);
+				}
+			}
 		}
 	}
 }
@@ -132,10 +146,13 @@ function set (name, value){
  *
  * @param {string} name
  */
-function remove (name) {
-    this.res.removeHeader(name);
+function remove () {
+	return {
+		value: function remove (name) {
+		    this.res.removeHeader(name);
+		}
+	}
 }
-
 
 /**
  * -----------------------------------------------------------
@@ -255,7 +272,7 @@ function body () {
 	      		}
 
 	      		if (setType) {
-	      			this.type = 'bin';
+	      			this.type = value._type || 'bin';
 	      		}
 
 	      		return this._body;

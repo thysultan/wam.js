@@ -1,14 +1,7 @@
 /**
  * -----------------------------------------------------------
- *  _      ______ _____ ___ 
- * | | /| / / __ `/ __ `__ \
- * | |/ |/ / /_/ / / / / / /
- * |__/|__/\__,_/_/ /_/ /_/ 
- *
- * Wam.js is a fast koa inspired middleware for node
- * https://github.com/thysultan/wam.js
  * 
- * @licence MIT
+ * application
  * 
  * -----------------------------------------------------------
  */
@@ -17,20 +10,21 @@
 'use strict';
 
 
-var http      = require('http');
-var fs        = require('fs');
+var http       = require('http');
+var fs         = require('fs');
+var Context    = require('./context');
+var Request    = require('./request');
+var Response   = require('./response');
+var Static     = require('./middlewares/static');
+var Compress   = require('./middlewares/compress');
+var Respond    = require('./middlewares/respond');
+var Router     = require('./middlewares/router');
+var Components = require('./middlewares/components');
+var utilities  = require('./utilities');
 
-var Context   = require('./context.js');
-var Request   = require('./request.js');
-var Response  = require('./response.js');
-var utilities = require('./utilities/index.js');
-
-var compose   = utilities.compose;
-var respond   = utilities.respond;
-var mimes     = utilities.mimes;
-var statuses  = utilities.statuses;
-var Static    = utilities.static;
-var Compress  = utilities.compress;
+var compose    = utilities.compose;
+var mimes      = utilities.mimes;
+var statuses   = utilities.statuses;
 
 
 /**
@@ -64,20 +58,21 @@ function Application () {
  * 
  * @type {Object}
  */
-Application.prototype = {
-	use:      use, 
-	listen:   listen, 
-	callback: callback, 
-	create:   create, 
-	error:    error,
-	static:   Static,
-	compress: Compress,
+Application.prototype = Object.create(null, {
+	use:        { value: use },
+	listen:     { value: listen },
+	callback:   { value: callback },
+	create:     { value: create },
+	error:      { value: error },
 
-	statuses: statuses,
-	mimes:    mimes,
-	http:     http,
-	fs:       fs
-};
+	static:     { value: Static },
+	compress:   { value: Compress },
+	router:     { value: Router },
+	components: { value: Components },
+
+	statuses:   { value: statuses },
+	mimes:      { value: mimes }
+});
 
 
 /**
@@ -98,61 +93,13 @@ Application.prototype = {
  * @return {Application}        self
  */
 function use (route, type, callback) {
-	this.middlewares[this.length++] = !type ? route : router(route, type, callback);
+	var middleware = !type ? route : Router(route, type, callback);
+
+	if (middleware) {
+		this.middlewares[this.length++] = middleware;
+	}
+
 	return this;
-}
-
-
-/**
- * define router middleware
- * 
- * @param  {string} route
- * @param  {(string|function)=} type
- * @param  {function}           middleware
- * @return {function}
- */
-function router (route, type, middleware) {	
-	type = type.toUpperCase();
-
-	if (!middleware) {
-		middleware = type, type = 'ALL';
-	}
-
-	var index   = 0;
-	var params  = [];
-	var regexp  = route instanceof RegExp ? route : /([:*])(\w+)|([\*])/g;
-	var pattern = new RegExp(
-		route.replace(regexp, function () {
-			var id = arguments[2];
-			return id != null ? (params[index++] = id, '([^\/]+)') : '(?:.*)';
-		}) + '$'
-	);
-
-	function reducer (previousValue, currentValue, index) {
-		if (previousValue == null) {
-			previousValue = {};
-		}
-
-		previousValue[params[index]] = currentValue;
-
-		return previousValue;
-	};
-
-	return function (ctx, next) {		
-		var location = ctx.request.url;
-		var method   = ctx.request.method;
-		var match    = location.match(pattern);
-
-		if (match != null && (method === type || type === 'ALL')) {			
-			var data = match.slice(1, match.length);
-
-			ctx.params = data.reduce(reducer, null);
-
-			middleware(ctx, next);
-		} else {
-			next();
-		}
-	}
 }
 
 
@@ -184,7 +131,7 @@ function callback () {
 
 		var context = application.create(req, res);
 
-		middleware(context, respond, error => context.error(error));
+		middleware(context, Respond, error => context.error(error));
 	};
 }
 
@@ -213,7 +160,7 @@ function create (req, res) {
 
 
 /**
- * default error handler
+ * default error logger
  *
  * @param {Error} error
  */

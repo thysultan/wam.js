@@ -10,7 +10,7 @@
 'use strict';
 
 
-var utilities = require('./utilities/index.js')
+var utilities = require('./utilities/');
 
 var delegate = utilities.delegate;
 var statuses = utilities.statuses;
@@ -45,32 +45,34 @@ function Context () {
  * 
  * @type {Object}
  */
-Context.prototype = {
-	error: function error (error) {
-		if (!(error instanceof Error)) {
-			error = new Error(error);
-		}
+Context.prototype = Object.create(Object.prototype, {
+	error: {
+		value: function error (error) {
+			if (!(error instanceof Error)) {
+				error = new Error(error);
+			}
 
-		// logger
-		this.app.error(error);
+			// error logger
+			this.app.error(error);
 
-		// if response is yet to complete
-		if (!this.headerSent || this.writable) {
-	  		// force text/html
-	  		this.type = 'html';
+			// if response is yet to complete
+			if (!this.headerSent || this.writable) {
+		  		// force text/html
+		  		this.type = 'html';
 
-	  		// default to 500
-			var code    = 500;
-			var message = code + ' - ' + (statuses[code] || 'Something went wrong');
+		  		// default to 500
+				var code    = 500;
+				var message = code + ' - ' + (statuses[code] || 'Something went wrong');
 
-			message     = '<h1>' + message + '</h1>';
-	  		this.status = code;
-	  		this.length = Buffer.byteLength(message);
+				message     = '<h1>' + message + '</h1>';
+		  		this.status = code;
+		  		this.length = Buffer.byteLength(message);
 
-	  		this.res.end(message);
+		  		this.res.end(message);
+			}
 		}
 	}
-};
+});
 
 
 // response delegates
