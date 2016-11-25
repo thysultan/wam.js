@@ -51,7 +51,6 @@ module.exports = function ({Component, renderToString, renderToStream, h, render
 		}
 	}
 
-	// 
 	renderToCache([Head]);
 
 	var render = renderToStream();

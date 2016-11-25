@@ -85,9 +85,7 @@ function Respond (context, control) {
 	}
 
 	// status body
-	if (body == null) {
-		console.log(body);
-		
+	if (body == null) {		
 		if (!res.headersSent) {
 			body = pretty(code + ' - ' + response.message, code, statuses[code]);
 
