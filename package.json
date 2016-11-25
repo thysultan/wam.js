@@ -2,7 +2,7 @@
 	"name": "wamjs",
 	"main": "wam.js",
 	"description": "Wam is a koa inspired middleware for node",
-	"version": "0.1.2",
+	"version": "0.2.0",
 	"homepage": "https://github.com/thysultan/wam.js",
 	"license": "MIT",
 	"author": {
