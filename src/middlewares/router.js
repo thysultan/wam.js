@@ -29,13 +29,22 @@
  */
 function Router (route, type, middleware) {
 	var method;
+	var isarray = false;
 
 	if (middleware === void 0) {
 		middleware = type, method = 'ALL';
 	} else {
-		method = type.toUpperCase();
+		if (typeof type === 'string') {
+			method = type.toUpperCase();
+		} else {
+			isarray = true;
+			method = type.map(function (str) { return str.toUpperCase(); });
+		}
 	}
 
+	// if the function does not use next() we can auto next() it
+	var auto = middleware.length < 2;
+	
 	var index   = 0;
 	var params  = [];
 	var regexp  = route instanceof RegExp ? route : /([:*])(\w+)|([\*])/g;
@@ -56,17 +65,28 @@ function Router (route, type, middleware) {
 		return previousValue;
 	};
 
-	return function (ctx, next) {		
-		var rlocation = ctx.request.url;
-		var rmethod   = ctx.request.method;
-		var match     = rlocation.match(pattern);
+	function is (_method) {
+		if (isarray) {
+			return method.indexOf(_method) > -1;
+		} else {
+			return _method === method || method === 'ALL';
+		}
+	}
 
-		if (match != null && (rmethod === method || method === 'ALL')) {			
+	return function (context, next) {		
+		var _location = context.request.url;
+		var _method   = context.request.method;
+		var match     = _location.match(pattern);
+
+		if (match != null && is(_method)) {	
 			var data = match.slice(1, match.length);
 
-			ctx.params = data.reduce(reducer, null);
+			context.params = data.reduce(reducer, null);
 
-			middleware(ctx, next);
+			middleware(context, next);
+
+			// auto proceed to next middlware
+			if (auto) { next(); }
 		} else {
 			next();
 		}

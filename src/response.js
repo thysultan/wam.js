@@ -98,7 +98,7 @@ function is () {
 
 
 /**
- * retreive response header, i.e get('Content-Type') => "text/plain"
+ * retrieve response header, i.e get('Content-Type') => "text/plain"
  * 
  * @param  {string} name
  * @return {string}
@@ -169,7 +169,7 @@ function remove () {
 function type () {
 	return {
 		/**
-		 * retreive Content-type response header
+		 * retrieve Content-type response header
 		 *
 		 * @return {string}
 		 */
@@ -203,7 +203,7 @@ function type () {
 function body () {
 	return {
 		/**
-		 * retreive response body
+		 * retrieve response body
 		 * 
 		 * @return {string}
 		 */
@@ -294,7 +294,7 @@ function body () {
 function length () {
 	return {
 		/**
-		 * retreive response length
+		 * retrieve response length
 		 * 
 		 * @return {number}
 		 */
@@ -334,7 +334,7 @@ function length () {
 function message () {
 	return {
 		/**
-		 * retreive response message
+		 * retrieve response message
 		 * 
 		 * @return {string}
 		 */
@@ -359,7 +359,7 @@ function message () {
 function status () {
 	return {
 		/**
-		 * retreive response status
+		 * retrieve response status
 		 * 
 		 * @return {number}
 		 */
@@ -392,7 +392,7 @@ function status () {
 function header () {
 	return {
 		/**
-		 * retreive response header
+		 * retrieve response header
 		 * 
 		 * @return {string}
 		 */

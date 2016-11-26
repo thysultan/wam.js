@@ -67,7 +67,7 @@ Application.prototype = Object.create(null, {
 
 	static:     { value: Static },
 	compress:   { value: Compress },
-	router:     { value: Router },
+	route:      { value: Router },
 	components: { value: Components },
 
 	statuses:   { value: statuses },
@@ -93,10 +93,21 @@ Application.prototype = Object.create(null, {
  * @return {Application}        self
  */
 function use (route, type, callback) {
-	var middleware = !type ? route : Router(route, type, callback);
+	if (route) {		
+		var middleware;
 
-	if (middleware) {
-		this.middlewares[this.length++] = middleware;
+		if (!type) {
+			middleware = route.length >= 2 ? route : function (ctx, next) {
+				route(ctx);
+				next();
+			};
+		} else {
+			middleware = Router(route, type, callback);
+		}
+
+		if (typeof middleware === 'function') {
+			this.middlewares[this.length++] = middleware;
+		}
 	}
 
 	return this;
@@ -131,7 +142,9 @@ function callback () {
 
 		var context = application.create(req, res);
 
-		middleware(context, Respond, error => context.error(error));
+		middleware(context, Respond, function (error) { 
+			context.error(error);
+		});
 	};
 }
 

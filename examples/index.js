@@ -23,7 +23,6 @@ app.use(app.components('examples/views', Dio));
 // 	}, Dio)
 // )
 
-
 // middleware
 // app.use((context, next) => {})
 
@@ -31,6 +30,16 @@ app.use(app.components('examples/views', Dio));
 // routes
 // app.use('/user/:id', 'get', (context, next) => { context.params.id === ':id' })
 
+// routes (multiple methods)
+// app.use('/', ['get', 'post'], (context) => {
+// 	context.body = 'Hello Brave World';
+//  next();
+// });
+
+// ommit next (auto next)
+// app.use((context) => {
+// 	context.body = 'Hello Brave World';
+// });
 
 // start server
 app.listen(3000);
