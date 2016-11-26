@@ -289,8 +289,8 @@ if it has one.
 
 2. Stores caches for the `.static` middlware in the directory provided
 within a `.cache` folder. This cache is updated as needed i.e if an asset is removed
-it's gzipped cache resource is also removed, of course this only continues syncing
+its gzipped cache resource is also removed, of course this syncing
 is only in place when not in `production` mode.
 
 3. If your filesystem supports the `/` characters in filenames then you
-can probably assign create a routing solution with just `app.components()` 
+can probably create a routing solution with just `app.components()` 
