@@ -1,8 +1,6 @@
 # wam.js
 
-Wam is a koa and next.js inspired middleware for node the following block of code
-is a quick run down on what Wam supports out of the box. 
-Following that i will try to explain the details of it all.
+Wam is a small koa and next.js inspired middleware framework for node the following block of code is a quick run down on what Wam supports out of the box, following that i will try to explain the details of it all.
 
 ```javascript
 const Wam = require('wamjs');
@@ -36,13 +34,13 @@ app.listen(3000);
 
 ## Application
 
-when you execute `new Wam()` a new application is created.
-this application object is the main point of entry for communicating with Wam api's.
-The following is the object returned by `new Wam()`;
+When you execute `new Wam()` a new application is created.
+This application object is the main point of entry for communicating with Wam api's. The following is the shape of the object returned by `new Wam()`;
 
 ```javascript
 {
-	use, listen, callback, create, error, static, compress, router, components, statuses, mimes
+	use, listen, callback, create, error, static, 
+	compress, router, components, statuses, mimes
 }
 ```
 
@@ -55,26 +53,28 @@ function that is used to jump to the next middlware in the chain.
 ```javascript
 app.use(function (context, next) {
 	// we will cover in full detail what the context object contains
-	// but if you have used Koa before this should be all to similar
+	// but if you have used Koa before this should be all to familiar
 	context.response.body === context.body === this.body;
 	context.request.url = context.url === this.url;
 
-	// where req and res represent the default request and response object from node
+	// where req and res represent the default 
+	// request and response stream object from node
 	this.req === context.req === context.response.req;
 	this.res === context.res === context.response.res;
 
 	// if there is another middlware this will execute that
-	// if this is the last middlware the response will finnally end
+	// if this is the last middlware the response will end
 	next();
 
-	// anything after next() call will execute after all middlwares in the chain
+	// anything after next() call will execute 
+	// after all middlwares in the chain
 	// have resolved but before the response has been sent
 
 	console.log('hello world');
 });
 ```
 
-Since routes are just middlwares as well the `app.use` function 
+Since routes are just middlwares the `app.use` function 
 doubles as a route register when the first argument is a String/RegExp
 
 ```javascript
@@ -85,18 +85,18 @@ app.use('/user/:name', function (ctx, next) {
 });
 ```
 
-As you may have notices i have not specified if this is handling a `GET` or `POST`
-request. When left blank the method resolves to handling all methods of that route
+As you may have notices a method has not been specified for the request. When left blank the method resolves to handling all methods of that route
 but you could also be explicit about it and do the following
 
 ```javascript
 app.use('/user/:name', 'ALL' function (ctx, next) {
 	// where `ALL` could be `GET` or `POST` or any method
+	// or event an array ['get', 'post'] with 
+	// just the methods the middlware should handle
 });
 ```
 
-If you wanted to be very explicit with routes you could also do the following,
-which is how Wam handles this under the hood.
+If you wanted to be very explicit with routes you could also do the following, which is how Wam handles this under the hood.
 
 ```javascript
 app.use(app.route('/user/:name', 'ALL', function (ctx, next) {
@@ -106,7 +106,7 @@ app.use(app.route('/user/:name', 'ALL', function (ctx, next) {
 
 ## Listen
 
-Creates a server and start listening for requests on the port 3000
+Creates a server and starts listening for requests on the port 3000
 
 ```javascript
 app.listen(3000);
@@ -124,34 +124,20 @@ Creates a middleware that handles requests for static files
 app.use(app.static('examples/public'));
 ```
 
-First it will resolve to the folder and create a tree
-of all the assets that reside there in the process
-this will also gzip any compressible assets using the 
-file type and filesize as an indicator.
-the results of the above are cached - *paths, file stats,
-and gzip payloads*.
+First it will resolve to the folder and create a tree of all the assets that residing, in the process this will also gzip any compressible assets using file type and file size as an indicator. The results of the above are cached - paths, file stats, and gzip payloads.
 
-When a request is received if the static middlware is added
-before other middlwares it will try to determine if the 
-request is for a static asset, if it is and the resource
-is available, and the body has not been set 
-it will serve the compressed asset as a stream
-and assign all the necessary headers.
+When a request is received the middleware will try to determine if the request is for a static asset, if it is and the resource is available, and the body has not been set it will serve the compressed asset as a stream and assign all the necessary headers.
 
-note that following this flow middlewares after 
-the static middleware will be bypassed
-if a static file is being served.
+Note that following this flow successfully will result in middlewares after the Static to be bypassed when a static file is request, found and served.
 
-Note that in `development`(non-production) enviroment the static files
-are watched for changes and updated as needed.
+When not in a production enviroment the static files are watched for changes and updated as needed.
 
 
 ## Components
 
 Creates a middleware for all the components/files found in 
-the specified directory, calling the returned function
-with `context` as the `this` and passing any dependencies/data
-passed.
+the specified directory and passing any dependencies if any 
+the returned function is called like any other middleware when the components route is matched.
 
 ```javascript
 // index.js
@@ -159,16 +145,18 @@ app.use(app.components('examples/views', {id: 1}));
 
 // examples/views/index.js
 module.exports = function ({id}) {
-	this.body = id;
+	return function () {
+		this.body = id;
+	}
 }
 
 // when a request is made to `/` the function
 // returned in `examples/views/index.js` will handle it.
-// the step of calling next is handled internally.
+// the step of calling next is handled internally
+// if next is not specified as an argument of the middlware.
 ```
 
-You could also be more specific and pass an object of the files - route
-matches to be used, for example...
+You could also be more specific and pass an object of the files - to - route matches to be used, for example...
 
 ```javascript
 app.use(app.components({'examples/views': '/'}, {id: 1}));
@@ -177,9 +165,8 @@ app.use(app.components({'examples/views': '/'}, {id: 1}));
 ## Compress
 
 Creates a middleware that provides on the fly(non cached) compression
-for example for json requests. If you want to server static content
-use `Static` instead since it uses caching and streaming that is faster
-to first byte and async.
+for example for json requests. If you wanted to serve static content
+use `Static` instead.
 
 ```javascript
 app.use(app.compress());
@@ -187,11 +174,7 @@ app.use(app.compress());
 
 ## Context
 
-The `context` object and `next` function are the two 
-arguments passed to every middlware function. 
-We will start with context and what you can do with it,
-though if you've used [Koa](https://github.com/koajs/koa) 
-before you probably know all of this.
+The `context` object and `next` function are the two arguments passed to every middlware function. We will start with context and what you can do with it, though if you've used [Koa](https://github.com/koajs/koa) before you are probably familiar with this.
 
 ```javascript
 {
@@ -253,59 +236,48 @@ before you probably know all of this.
 
 ## Next
 
-The `next` function is a central piece that connects the pieces
-that are middlewares together, though unlike `Koa` the next
-function accepts an optional argument that is used internally
-but tha you could make use of when needed. Imagine the following
+The `next` function is a central piece that connects middlewares together, though unlike `Koa` the next function accepts an optional argument that is used internally but one that you could make use of when needed.
 
 
 ```javascript
 app.use((ctx, next) => {
 	// 1. if i pass 0 to next(0)
-	// this will immediatly bypass all the middelwares
-	// next up in the chain and diverge straight to sending
-	// out the response
-	next();
+	// this will immediatly bypass all middelwares 
+	// after this middleware and send the response	next(0);
 });
 
 app.use((ctx, next) => {
 	// 2. if i pass 1 to next(1)
 	// this will do the above plus opt out of the built
 	// in response handling
-	next();
+	next(1);
 });
 
 app.use((ctx) => {
 	// 3. if i don't define the next argument
 	// next() will automatically run at the end of this function
-	// this is behaviour different from Koa
 });
 ```
 
 ## Under The Hood
 
-1. Wam checks if a stream has a _type property to determine and set the response type
-if it has one.
+1. Wam checks if a stream has a _type property to determine and set the response type if it has one.
 
-2. Stores caches for the `.static` middlware in the directory provided
-within a `.cache` folder. This cache is updated as needed i.e if an asset is removed
-its gzipped cache resource is also removed, of course this syncing
-is only in place when not in `production` mode.
+2. stores caches for the `.static` middlware in the directory provided
+within a `.cache` folder. This cache is updated as needed i.e if an asset is removed its gzipped resource is also removed, though this syncing is only in place when not in `production` mode.
 
 3. If your filesystem supports the `/` characters in filenames then you
-can probably create a routing solution with just `app.components()` 
+could potentially create a routing solution with just the `app.components()` middleware.
 
 
 ## Intergration
 
 Wam can be used as a general solution with the above listed api's
-but really shines when coupled with [Dio.js](https://github.com/thysultan/dio.js) and
-the `app.components()` api, in part inspired by [next.js](https://github.com/zeit/next.js).
+but really shines when coupled with [Dio.js](https://github.com/thysultan/dio.js) and the `app.components()` api, in part inspired by [next.js](https://github.com/zeit/next.js).
 
 Note that the below will also work when used with any other vdom library 
-making use of something like `renderToString/renderToStream` meaning you 
-can do the exact following with React, Preact and Inferno
-minus the `renderToCache`, `stylesheet` and `h` (though preact supports this).
+making use of something like `renderToString/renderToStream` meaning you can do the exact following with React, Preact and Inferno
+minus the `renderToCache`, and `stylesheet`.
 
 ```javascript
 // views/index.js
@@ -348,7 +320,7 @@ module.exports = function ({Component, renderToStream, h, renderToCache}) {
 			)
 		}
 	}
-
+	
 	renderToCache([Head]);
 
 	return (ctx) => ctx.body = renderToStream(Page);
@@ -358,5 +330,5 @@ module.exports = function ({Component, renderToStream, h, renderToCache}) {
 const app = new require('wamjs')();
 
 app.use(app.static('public/'));
-app.use(app.components('views/'));
+app.use(app.components('views/', require('dio.js')));
 ```

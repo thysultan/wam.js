@@ -16,7 +16,7 @@ var zlib         = require('zlib');
 var compressible = require('./mimes').compressible;
 
 var extname      = path.extname;
-var hidden       = /(^|\/)\.[^\/\.]/g;
+var hidden       = /(?:^|\/)\.[^\/\.]|node_modules$|npm-debug\.log$/g;
 
 
 /**
@@ -38,7 +38,7 @@ function walk (directory, store, start, cache, threshold, zip) {
 		var mtime    = filestat.mtime;
 		var size     = filestat.size;
 
-		// ignore hidden files i.e `.cache/.DS_Store`...
+		// ignore hidden files i.e `.cache/.DS_Store` and node_modules ...
 		if (!hidden.test(filename)) {
 			if (fs.statSync(filepath).isDirectory()) {
 				// directory, recursive walk
