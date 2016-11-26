@@ -296,7 +296,7 @@ is only in place when not in `production` mode.
 can probably create a routing solution with just `app.components()` 
 
 
-### Intergration
+## Intergration
 
 Wam can be used as a general solution with the above listed api's
 but really shines when coupled with [Dio.js](https://github.com/thysultan/dio.js) and
