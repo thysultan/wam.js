@@ -294,3 +294,43 @@ is only in place when not in `production` mode.
 
 3. If your filesystem supports the `/` characters in filenames then you
 can probably create a routing solution with just `app.components()` 
+
+
+### Intergration
+
+Wam can be used as a general solution with the above listed api's
+but really shines when coupled with [Dio.js](https://github.com/thysultan/dio.js) and
+the `app.components()`, in part inspired by [next.js](https://github.com/zeit/next.js).
+
+```javascript
+// views/index.js
+module.exports = function ({Component, renderToStream, h, renderToCache}) {
+	class Head extends Component {
+		render () {
+			return h('head',
+				h('title', 'Hello World'),
+				h('link', {rel: 'stylesheet', href: 'style.css'})
+			)
+		}
+	}
+
+	class Body extends Component {
+		render () {
+			return h('body', Hello, Button, Button);
+		}
+	}
+
+	class Page extends Component {
+		render () {
+			return h('html', 
+				Head,
+				Body
+			)
+		}
+	}
+
+	renderToCache([Head]);
+
+	return (ctx) => ctx.body = renderToStream(Page);
+}
+```

@@ -69,10 +69,7 @@ function register (app, files, data) {
 
 		var component = require(filepath).call(app, data);
 
-		app.use(route, function (context, next) {
-			component.call(context); 
-			next();
-		});
+		app.use(route, component);
 	}
 }
 

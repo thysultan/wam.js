@@ -55,7 +55,5 @@ module.exports = function ({Component, renderToString, renderToStream, h, render
 
 	var render = renderToStream();
 
-	return function () {
-		this.body = render(Page);
-	}
+	return (ctx) => ctx.body = renderToStream(Page);
 }
