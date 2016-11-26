@@ -9,7 +9,7 @@ const app = new Wam();
 
 
 // serve static files, cahced and compressed
-app.use(app.static('examples/public'));
+app.use(app.static('examples/public/'));
 
 
 // component architecture v1 (directory)

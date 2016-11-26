@@ -300,7 +300,12 @@ can probably create a routing solution with just `app.components()`
 
 Wam can be used as a general solution with the above listed api's
 but really shines when coupled with [Dio.js](https://github.com/thysultan/dio.js) and
-the `app.components()`, in part inspired by [next.js](https://github.com/zeit/next.js).
+the `app.components()` api, in part inspired by [next.js](https://github.com/zeit/next.js).
+
+Note that the below will also work when used with any other vdom library 
+making use of something like `renderToString/renderToStream` meaning you 
+can do the exact following with React, Preact and Inferno
+minus the `renderToCache`, `stylesheet` and `h` (though preact supports this).
 
 ```javascript
 // views/index.js
@@ -320,6 +325,21 @@ module.exports = function ({Component, renderToStream, h, renderToCache}) {
 		}
 	}
 
+	class Button extends Component {
+		stylesheet () {
+			return `
+				{
+					color: black;
+					border: 1px solid red;
+					padding: 10px;
+				}
+			`
+		}
+		render () {
+			return h('button', 'Click Me');
+		}
+	}
+
 	class Page extends Component {
 		render () {
 			return h('html', 
@@ -333,4 +353,10 @@ module.exports = function ({Component, renderToStream, h, renderToCache}) {
 
 	return (ctx) => ctx.body = renderToStream(Page);
 }
+
+// index.js
+const app = new require('wamjs')();
+
+app.use(app.static('public/'));
+app.use(app.components('views/'));
 ```
