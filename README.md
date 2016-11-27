@@ -1,5 +1,8 @@
 # wam.js
 
+[![npm](https://img.shields.io/npm/v/wamjs.svg?style=flat)](https://www.npmjs.com/package/wamjs) [![licence](https://img.shields.io/badge/licence-MIT-blue.svg?style=flat)](https://github.com/thysultan/wam.js/blob/master/LICENSE.md) 
+ ![dependencies](https://img.shields.io/badge/dependencies-none-green.svg?style=flat)
+
 Wam is a small koa and next.js inspired middleware framework for node the following block of code is a quick run down on what Wam supports out of the box, following that i will try to explain the details of it all.
 
 ```javascript
