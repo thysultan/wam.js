@@ -35,7 +35,7 @@ function walk (directory, store, start, cache, threshold, zip) {
 		var filename = files[i];
 
 		// ignore hidden files i.e `.cache/.DS_Store` and node_modules ...
-		if (filename[0] !== '.' && !hidden.test(filename)) {			
+		if (filename.charCodeAt(0) !== 46 && !hidden.test(filename)) {
 			var filepath = path.join(directory, filename);
 			var filestat = fs.statSync(filepath);
 			var mtime    = filestat.mtime;
