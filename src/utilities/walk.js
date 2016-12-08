@@ -16,7 +16,7 @@ var zlib         = require('zlib');
 var compressible = require('./mimes').compressible;
 
 var extname      = path.extname;
-var hidden       = /(?:^|\/)\.[^\/\.]|node_modules$|npm-debug\.log$/g;
+var hidden       = /(?:^|\/)\.[^\/\.]|node_modules|npm-debug\.log|package\.json/g;
 
 
 /**
@@ -33,17 +33,19 @@ function walk (directory, store, start, cache, threshold, zip) {
 	// a directory recursively walk the tree
 	for (var i = 0, length = files.length; i < length; i++) {
 		var filename = files[i];
-		var filepath = path.join(directory, filename);
-		var filestat = fs.statSync(filepath);
-		var mtime    = filestat.mtime;
-		var size     = filestat.size;
 
 		// ignore hidden files i.e `.cache/.DS_Store` and node_modules ...
-		if (!hidden.test(filename)) {
+		if (filename[0] !== '.' && !hidden.test(filename)) {			
+			var filepath = path.join(directory, filename);
+			var filestat = fs.statSync(filepath);
+			var mtime    = filestat.mtime;
+			var size     = filestat.size;
+
 			if (fs.statSync(filepath).isDirectory()) {
 				// directory, recursive walk
 				store = walk(filepath, store, start, cache, threshold, zip);
 			} else {
+				return;
 				var ext = extname(filepath).substr(1);
 				var compress = compressible[ext];
 				var gzip = null;
