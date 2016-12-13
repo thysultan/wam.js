@@ -45,7 +45,6 @@ function walk (directory, store, start, cache, threshold, zip) {
 				// directory, recursive walk
 				store = walk(filepath, store, start, cache, threshold, zip);
 			} else {
-				return;
 				var ext = extname(filepath).substr(1);
 				var compress = compressible[ext];
 				var gzip = null;

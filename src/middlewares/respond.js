@@ -9,6 +9,7 @@
 
 'use strict';
 
+
 var Stream    = require('stream');
 var utilities = require('../utilities');
 
@@ -103,6 +104,12 @@ function Respond (context, control) {
 		// string/buffer
 		return res.end(body);
 	} else if (body instanceof Stream) {
+		// TODO, compress text/html streams
+		// if (response.type === 'text\html') {
+		// 		var gzip = zlib.createGzip();
+		// 		body.pipe(gzip).pipe(res);
+		// 	}
+
 		// stream
 		return body.pipe(res);
 	} else {
